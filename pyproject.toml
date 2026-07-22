@@ -8,3 +8,6 @@ dependencies = [
     "yfinance",
     "joblib"
 ]
+
+[tool.vercel]
+entrypoint = "api.refresh:app"
