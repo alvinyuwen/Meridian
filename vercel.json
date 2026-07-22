@@ -1,4 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "functions": {
+    "api/**/*.py": {
+      "memory": 1024,
+      "maxDuration": 10,
+      "includeFiles": "data/**"
+    }
+  }
 }
