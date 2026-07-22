@@ -1,5 +1,5 @@
-yfinance
-pandas
-scikit-learn
-joblib
-numpy
+scikit-learn==1.4.2
+pandas==2.2.2
+numpy==1.26.4
+yfinance==0.2.40
+joblib==1.4.2
