@@ -163,7 +163,15 @@ def build_labels(price_df: pd.DataFrame) -> pd.DataFrame:
         grp = grp.sort_values("Date").copy()
         grp["future_close"] = grp["Close"].shift(-HORIZON_DAYS)
         grp["forward_return"] = grp["future_close"] / grp["Close"] - 1
-        grp["label"] = (grp["forward_return"] > UP_THRESHOLD).astype(int)
+        # Rows with no future_close (the last HORIZON_DAYS rows of each
+        # ticker) have no valid forward_return — label must be NaN, not 0,
+        # so they get excluded by the dropna() in main() rather than
+        # silently treated as a "DOWN" outcome.
+        grp["label"] = np.where(
+            grp["forward_return"].notna(),
+            (grp["forward_return"] > UP_THRESHOLD).astype(float),
+            np.nan,
+        )
         out.append(grp[["Ticker", "Date", "label", "forward_return"]])
     return pd.concat(out, ignore_index=True)
 
@@ -294,7 +302,7 @@ def main():
 
     os.makedirs(os.path.dirname(RESULTS_PATH), exist_ok=True)
     with open(RESULTS_PATH, "w") as f:
-        json.dump(results, f, indent=2)
+        json.dump(results, f, indent=2, allow_nan=False)
     print(f"Saved results to {RESULTS_PATH}")
     print("\nDone. Commit model/model.pkl and data/results.json to your repo.")
 
