@@ -1,29 +1,23 @@
 """
 api/refresh.py
 ================
-Vercel Python serverless function. Handles GET /api/refresh.
+Modern 2026 Vercel Python Serverless Function (ASGI format).
 
-Loads the pre-trained model (model/model.pkl), fetches FRESH prices for
-the tracked tickers via yfinance, recomputes price-based features, and
-returns updated predictions. Does NOT retrain the model and does NOT
-re-fetch insider data (that stays static, refreshed offline via
-pipeline/generate_site_data.py) — this keeps the function fast enough to
-finish inside Vercel's 10-second Hobby-tier timeout.
+Vercel's latest Python runtime natively supports ASGI/WSGI apps. By defining 
+an `app` object, we bypass the legacy `BaseHTTPRequestHandler` entirely, 
+resulting in cleaner code, better performance, and native async support.
 
-Response shape (JSON):
-{
-  "generated_at": "...",
-  "tickers": {
-    "AAPL": {"prediction": "UP", "probability_up": 0.57, "last_price": 231.40, "as_of_date": "2026-07-21"},
-    ...
-  }
-}
+This function loads the pre-trained model (model/model.pkl), fetches FRESH 
+prices for the tracked tickers via yfinance, recomputes price-based features, 
+and returns updated predictions. It does NOT retrain the model and does NOT 
+re-fetch insider data — keeping the function well within Vercel's 10-second 
+Hobby-tier timeout.
 """
 
+import asyncio
 import json
-import os
 from datetime import datetime, timezone
-from http.server import BaseHTTPRequestHandler
+from pathlib import Path
 
 import joblib
 import pandas as pd
@@ -31,14 +25,31 @@ import yfinance as yf
 
 TICKERS = ["BAC", "SOFI", "INTC", "KDP", "DAL", "COIN", "AMZN", "SPG"]
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(REPO_ROOT, "model", "model.pkl")
-RESULTS_PATH = os.path.join(REPO_ROOT, "data", "results.json")
+# Bulletproof path resolution for Vercel's serverless environment.
+# On Vercel, the function runs in /var/task/, so the repo root is /var/task/.
+_HERE = Path(__file__).resolve().parent
+_REPO_ROOT = _HERE.parent
+
+def find_file(candidates):
+    """Return the first existing file from a list of candidates."""
+    for p in candidates:
+        if p.exists():
+            return p
+    return candidates[0] # Fallback to the first to throw a clear error if missing
+
+# Vercel bundles files based on vercel.json. We check multiple locations.
+MODEL_PATH = find_file([
+    _REPO_ROOT / "model" / "model.pkl",
+    _REPO_ROOT / "data" / "model.pkl",  # Fallback if bundled with data
+    _HERE / "model.pkl",
+])
+
+RESULTS_PATH = find_file([
+    _REPO_ROOT / "data" / "results.json",
+    _HERE / "results.json",
+])
 
 # Price-only feature columns this function can recompute live.
-# Insider feature columns are read from the last known values in
-# results.json rather than recomputed, since insider data refreshes
-# on a slower, separate cadence.
 PRICE_FEATURE_COLS = [
     "return_1d", "return_5d", "sma_10", "sma_30", "price_vs_sma30", "volatility_10d",
 ]
@@ -46,7 +57,6 @@ INSIDER_FEATURE_COLS = [
     "insider_n_buys_30d", "insider_n_sells_30d", "insider_buy_sell_ratio_30d",
     "insider_net_value_30d", "insider_cluster_buy_flag",
 ]
-
 
 def compute_price_features(close_series: pd.Series) -> dict:
     s = close_series.dropna()
@@ -69,13 +79,13 @@ def compute_price_features(close_series: pd.Series) -> dict:
         "as_of_date": s.index[-1].strftime("%Y-%m-%d"),
     }
 
-
 def run_refresh() -> dict:
+    """Synchronous ML logic executed safely in a background thread."""
     bundle = joblib.load(MODEL_PATH)
     model = bundle["model"]
     feature_cols = bundle["feature_cols"]
 
-    with open(RESULTS_PATH) as f:
+    with open(RESULTS_PATH, "r", encoding="utf-8") as f:
         last_results = json.load(f)
 
     raw = yf.download(TICKERS, period="6mo", progress=False)
@@ -113,19 +123,62 @@ def run_refresh() -> dict:
         "tickers": output,
     }
 
-
-class handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        try:
-            result = run_refresh()
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.end_headers()
-            self.wfile.write(json.dumps(result).encode("utf-8"))
-        except Exception as e:
-            self.send_response(500)
-            self.send_header("Content-type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
+async def app(scope, receive, send):
+    """
+    Modern ASGI application entry point.
+    Vercel's runtime natively detects and executes the `app` object.
+    """
+    if scope["type"] != "http":
         return
+
+    method = scope.get("method", "")
+
+    # Handle CORS preflight requests
+    if method == "OPTIONS":
+        await send({
+            "type": "http.response.start",
+            "status": 204,
+            "headers": [
+                [b"access-control-allow-origin", b"*"],
+                [b"access-control-allow-methods", b"GET, OPTIONS"],
+                [b"access-control-allow-headers", b"Content-Type"],
+            ],
+        })
+        await send({"type": "http.response.body", "body": b""})
+        return
+
+    if method == "GET":
+        try:
+            # Run synchronous, CPU/IO-bound ML logic in a separate thread 
+            # to avoid blocking the ASGI event loop.
+            result = await asyncio.to_thread(run_refresh)
+            
+            response_body = json.dumps(result).encode("utf-8")
+            await send({
+                "type": "http.response.start",
+                "status": 200,
+                "headers": [
+                    [b"content-type", b"application/json"],
+                    [b"access-control-allow-origin", b"*"],
+                ],
+            })
+            await send({"type": "http.response.body", "body": response_body})
+        except Exception as e:
+            error_body = json.dumps({"error": str(e)}).encode("utf-8")
+            await send({
+                "type": "http.response.start",
+                "status": 500,
+                "headers": [
+                    [b"content-type", b"application/json"],
+                    [b"access-control-allow-origin", b"*"],
+                ],
+            })
+            await send({"type": "http.response.body", "body": error_body})
+    else:
+        # Reject non-GET/OPTIONS methods
+        await send({
+            "type": "http.response.start",
+            "status": 405,
+            "headers": [[b"content-type", b"application/json"]],
+        })
+        await send({"type": "http.response.body", "body": b'{"error": "Method Not Allowed"}'})
