@@ -14,13 +14,12 @@
   <nav class="tabs">
     <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
     <button class="tab-btn" data-tab="deepdive">Deep-Dive</button>
-    <button class="tab-btn" data-tab="performance">Model Performance</button>
+    <button class="tab-btn" data-tab="performance">Model</button>
   </nav>
 </header>
 
 <main>
 
-  <!-- ===================== DASHBOARD TAB ===================== -->
   <section id="dashboard" class="tab-panel active">
     <div class="panel-header">
       <div>
@@ -33,7 +32,6 @@
     <div id="ticker-grid" class="ticker-grid"></div>
   </section>
 
-  <!-- ===================== DEEP-DIVE TAB ===================== -->
   <section id="deepdive" class="tab-panel">
     <div class="panel-header">
       <div>
@@ -65,7 +63,6 @@
     </div>
   </section>
 
-  <!-- ===================== PERFORMANCE TAB ===================== -->
   <section id="performance" class="tab-panel">
     <div class="panel-header">
       <div>
@@ -78,7 +75,7 @@
 
     <div class="deepdive-grid">
       <div class="card">
-        <h3>Backtest: Strategy vs. Buy &amp; Hold</h3>
+        <h3>Strategy vs. Buy &amp; Hold</h3>
         <canvas id="backtest-chart" height="220"></canvas>
       </div>
       <div class="card">
