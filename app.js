@@ -13,18 +13,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupTabs();
   await loadResults();
   renderDashboard();
-  renderDeepDiveTickerList();
-  renderDeepDive(selectedTicker);
-  renderPerformance();
+  renderDeepDiveTickerList(); // Populates ticker selection buttons
   document.getElementById('refresh-btn').addEventListener('click', handleRefresh);
 });
-
-async function loadResults() {
-  const res = await fetch('data/results.json');
-  RESULTS = await res.json();
-  selectedTicker = Object.keys(RESULTS.tickers)[0] || null;
-  document.getElementById('footer-generated').textContent = formatDate(RESULTS.generated_at);
-}
 
 // ===================== Tabs =====================
 function setupTabs() {
@@ -33,7 +24,16 @@ function setupTabs() {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
-      document.getElementById(btn.dataset.tab).classList.add('active');
+      
+      const tabId = btn.dataset.tab;
+      document.getElementById(tabId).classList.add('active');
+
+      // Redraw charts ONLY when the tab becomes visible so Chart.js gets real dimensions
+      if (tabId === 'deepdive' && selectedTicker) {
+        renderDeepDive(selectedTicker);
+      } else if (tabId === 'performance') {
+        renderPerformance();
+      }
     });
   });
 }
