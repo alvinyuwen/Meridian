@@ -1,0 +1,313 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
+
+/* ===================== Design tokens ===================== */
+:root {
+  --paper: #ede7d9;
+  --paper-alt: #e3dcc9;
+  --paper-deep: #d9d0b8;
+  --ink: #1b2a41;
+  --ink-soft: #55637a;
+  --ink-faint: #8a92a3;
+  --gold: #a8781f;
+  --gold-bg: #f1e4c4;
+  --brick: #a33b2d;
+  --brick-bg: #f0dcd6;
+  --rule: #c9bfa0;
+  --card-shadow: 0 1px 0 rgba(27, 42, 65, 0.06), 0 8px 20px -12px rgba(27, 42, 65, 0.25);
+
+  --font-display: 'Source Serif 4', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-ui: 'Inter', -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  background-image:
+    linear-gradient(var(--rule) 1px, transparent 1px);
+  background-size: 100% 32px;
+  background-attachment: local;
+}
+
+::selection { background: var(--gold-bg); color: var(--ink); }
+
+/* ===================== Top bar ===================== */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--paper);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.brand span { color: var(--gold); }
+
+.tabs { display: flex; gap: 4px; }
+
+.tab-btn {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid transparent;
+  color: var(--ink-soft);
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active {
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  background: var(--paper-alt);
+}
+.tab-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* ===================== Layout ===================== */
+main { max-width: 1080px; margin: 0 auto; padding: 40px 32px 80px; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeIn 0.25s ease; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.subtitle { color: var(--ink-soft); margin: 0; font-size: 0.95rem; }
+
+/* ===================== Refresh button ===================== */
+.refresh-btn {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.refresh-btn:hover:not(:disabled) { background: var(--gold); }
+.refresh-btn:active:not(:disabled) { transform: translateY(1px); }
+.refresh-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
+.refresh-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.refresh-status {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  min-height: 1.2em;
+  margin: -12px 0 20px;
+}
+
+/* ===================== Ticker cards (signature element) ===================== */
+.ticker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.ticker-card {
+  position: relative;
+  background: var(--paper-alt);
+  border: 1px solid var(--rule);
+  padding: 20px;
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+}
+.ticker-card:hover { transform: translateY(-2px); box-shadow: 0 4px 0 rgba(27,42,65,0.08), 0 14px 24px -12px rgba(27,42,65,0.3); }
+.ticker-card:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.ticker-symbol {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: 0.02em;
+}
+
+.ticker-price {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+/* the "stamp" — signature motif referencing the SEC Form 4 source data */
+.stamp {
+  position: absolute;
+  top: 14px;
+  right: -28px;
+  transform: rotate(8deg);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 34px;
+  border: 1.5px solid currentColor;
+  text-transform: uppercase;
+}
+.stamp.up { color: var(--gold); background: var(--gold-bg); }
+.stamp.down { color: var(--brick); background: var(--brick-bg); }
+
+.ticker-prob {
+  margin-top: 16px;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.prob-bar {
+  height: 5px;
+  background: var(--rule);
+  margin-top: 6px;
+  position: relative;
+}
+.prob-bar-fill { height: 100%; background: var(--ink); }
+
+.ticker-asof {
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  border-top: 1px solid var(--rule);
+  padding-top: 10px;
+}
+
+/* ===================== Cards (general) ===================== */
+.card {
+  background: var(--paper-alt);
+  border: 1px solid var(--rule);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--card-shadow);
+}
+.card h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin: 0 0 16px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 10px;
+}
+
+.deepdive-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 800px) {
+  .deepdive-grid { grid-template-columns: 1fr; }
+}
+
+/* ===================== Ticker select ===================== */
+#ticker-select {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: var(--paper-alt);
+  border: 1px solid var(--ink);
+  padding: 10px 14px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* ===================== Tables ===================== */
+.feature-table, .insider-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+.feature-table td, .insider-table td, .insider-table th {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+}
+.feature-table td:first-child { color: var(--ink-soft); }
+.feature-table td:last-child { text-align: right; font-weight: 700; }
+.insider-table th {
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.tag-buy { color: var(--gold); font-weight: 700; }
+.tag-sell { color: var(--brick); font-weight: 700; }
+
+/* ===================== Performance metrics ===================== */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.metric-box {
+  background: var(--paper-alt);
+  border: 1px solid var(--rule);
+  padding: 16px;
+  text-align: center;
+}
+.metric-value {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.metric-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+.methodology ul { margin: 0; padding-left: 20px; color: var(--ink-soft); font-size: 0.9rem; line-height: 1.7; }
+
+/* ===================== Footer ===================== */
+footer {
+  text-align: center;
+  padding: 24px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  border-top: 1px solid var(--rule);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
