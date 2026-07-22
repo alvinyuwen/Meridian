@@ -1,98 +1,139 @@
-/* ===================== Design tokens (Apple Pro Dark) ===================== */
-:root {
-  --bg-color: #000000;
-  --card-bg: #1c1c1e;
-  --text-main: #f5f5f7;
-  --text-muted: #86868b;
-  --accent: #0a84ff; /* Apple Dark Mode Blue */
-  --up-color: #30d158; /* Apple Dark Mode Green */
-  --up-bg: rgba(48, 209, 88, 0.15);
-  --down-color: #ff453a; /* Apple Dark Mode Red */
-  --down-bg: rgba(255, 69, 58, 0.15);
-  --border-color: #38383a;
-  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  --hover-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Helvetica, sans-serif;
-  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+/* ===================== Design tokens ===================== */
+:root {
+  --bg-deep: #080b14;
+  --bg-glow-indigo: #1b2a5e;
+  --bg-glow-teal: #0d3d3f;
+  --bg-glow-rose: #3a1230;
+
+  --glass-fill: rgba(255, 255, 255, 0.055);
+  --glass-fill-strong: rgba(255, 255, 255, 0.09);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-strong: rgba(255, 255, 255, 0.22);
+
+  --text-primary: #f2f4f9;
+  --text-secondary: #a3adc2;
+  --text-faint: #6b7690;
+
+  --gold: #e8b94e;
+  --gold-soft: rgba(232, 185, 78, 0.35);
+  --emerald: #34d399;
+  --emerald-soft: rgba(52, 211, 153, 0.35);
+  --rose: #fb7185;
+  --rose-soft: rgba(251, 113, 133, 0.35);
+
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-ui: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --blur: blur(22px);
+  --radius: 18px;
 }
 
 * { box-sizing: border-box; }
 
+html { scroll-behavior: smooth; }
+
 body {
   margin: 0;
-  background: var(--bg-color);
-  color: var(--text-main);
+  min-height: 100vh;
+  background: var(--bg-deep);
+  color: var(--text-primary);
   font-family: var(--font-ui);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
 }
 
-::selection { background: rgba(10, 132, 255, 0.3); color: #ffffff; }
+/* Horizon-glow backdrop — the "meridian" atmosphere the glass floats over */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 900px 600px at 15% -5%, var(--bg-glow-indigo) 0%, transparent 60%),
+    radial-gradient(ellipse 1000px 700px at 90% 15%, var(--bg-glow-teal) 0%, transparent 55%),
+    radial-gradient(ellipse 800px 500px at 50% 110%, var(--bg-glow-rose) 0%, transparent 55%),
+    var(--bg-deep);
+}
+
+/* Faint horizon line across the viewport — subtle, evokes a meridian */
+body::after {
+  content: '';
+  position: fixed;
+  left: 0; right: 0; top: 42%;
+  height: 1px;
+  z-index: -1;
+  background: linear-gradient(90deg, transparent, var(--gold-soft), transparent);
+  opacity: 0.5;
+}
+
+::selection { background: var(--gold-soft); color: var(--text-primary); }
+
+/* ===================== Glass utility ===================== */
+.topbar, .card, .ticker-card, .metric-box, #ticker-select, .refresh-btn {
+  background: var(--glass-fill);
+  backdrop-filter: var(--blur) saturate(160%);
+  -webkit-backdrop-filter: var(--blur) saturate(160%);
+  border: 1px solid var(--glass-border);
+}
 
 /* ===================== Top bar ===================== */
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 32px;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 18px 32px;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 50;
+  border-left: none; border-right: none; border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
 }
 
 .brand {
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
-}
-.brand span { color: var(--accent); font-weight: 600; }
-
-.tabs {
+  letter-spacing: -0.01em;
   display: flex;
-  background: #2c2c2e;
-  padding: 4px;
-  border-radius: 999px;
+  align-items: baseline;
+  gap: 2px;
 }
+.brand span { color: var(--gold); }
+
+.tabs { display: flex; gap: 6px; }
 
 .tab-btn {
   font-family: var(--font-ui);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   background: transparent;
-  border: none;
-  color: var(--text-muted);
-  padding: 6px 16px;
+  border: 1px solid transparent;
   border-radius: 999px;
+  color: var(--text-secondary);
+  padding: 9px 18px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.tab-btn:hover { color: var(--text-main); }
+.tab-btn:hover { color: var(--text-primary); background: var(--glass-fill); }
 .tab-btn.active {
-  color: #ffffff;
-  background: #636366;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  color: var(--bg-deep);
+  background: var(--gold);
+  font-weight: 700;
 }
-.tab-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tab-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 /* ===================== Layout ===================== */
-main { max-width: 1080px; margin: 0 auto; padding: 48px 32px 80px; }
+main { max-width: 1100px; margin: 0 auto; padding: 48px 32px 100px; }
 
 .tab-panel { display: none; }
-.tab-panel.active { display: block; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.tab-panel.active { display: block; animation: fadeIn 0.35s ease; }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -107,40 +148,48 @@ main { max-width: 1080px; margin: 0 auto; padding: 48px 32px 80px; }
 
 h1 {
   font-family: var(--font-display);
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  letter-spacing: -0.03em;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
 }
 
-.subtitle { color: var(--text-muted); margin: 0; font-size: 1rem; font-weight: 400; }
+.subtitle { color: var(--text-secondary); margin: 0; font-size: 0.95rem; }
 
 /* ===================== Refresh button ===================== */
 .refresh-btn {
   font-family: var(--font-ui);
-  font-size: 0.9rem;
-  font-weight: 600;
-  background: var(--text-main);
-  color: var(--bg-color);
-  border: none;
-  padding: 10px 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
   border-radius: 999px;
+  padding: 13px 24px;
   cursor: pointer;
-  transition: transform 0.1s ease, opacity 0.2s ease;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
-.refresh-btn:hover:not(:disabled) { opacity: 0.9; }
-.refresh-btn:active:not(:disabled) { transform: scale(0.97); }
-.refresh-btn:disabled { background: var(--border-color); color: var(--text-muted); cursor: not-allowed; }
-.refresh-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.refresh-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  opacity: 0; transition: opacity 0.2s ease;
+}
+.refresh-btn:hover:not(:disabled) { border-color: var(--gold-soft); color: var(--gold); }
+.refresh-btn:active:not(:disabled) { transform: scale(0.98); }
+.refresh-btn:disabled { color: var(--text-faint); cursor: not-allowed; }
+.refresh-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 .refresh-status {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
   min-height: 1.2em;
-  margin: -16px 0 24px;
+  margin: -18px 0 24px;
 }
 
-/* ===================== Ticker cards ===================== */
+/* ===================== Ticker cards (signature meridian line) ===================== */
 .ticker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -149,97 +198,113 @@ h1 {
 
 .ticker-card {
   position: relative;
-  background: var(--card-bg);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  box-shadow: var(--card-shadow);
+  border-radius: var(--radius);
+  padding: 24px 22px 20px;
   cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
-  border: 1px solid rgba(255,255,255,0.05);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
 }
-.ticker-card:hover { 
-  transform: translateY(-4px); 
-  box-shadow: var(--hover-shadow); 
+
+/* The signature element: a glowing meridian line across the top edge,
+   colored by the prediction it carries. */
+.ticker-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  box-shadow: 0 0 14px 1px currentColor;
+  opacity: 0.85;
 }
-.ticker-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.ticker-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--glass-border-strong);
+  box-shadow: 0 16px 40px -20px rgba(0, 0, 0, 0.6);
+}
+.ticker-card:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
 .card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  justify-content: space-between;
+  margin-bottom: 14px;
 }
 
 .ticker-symbol {
-  font-family: var(--font-display);
+  font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 1.4rem;
-  letter-spacing: -0.01em;
+  font-size: 1.25rem;
+  letter-spacing: 0.01em;
 }
 
 .badge {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   padding: 4px 10px;
   border-radius: 999px;
-  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
 }
-.badge.up { background: var(--up-bg); color: var(--up-color); }
-.badge.down { background: var(--down-bg); color: var(--down-color); }
+.badge.up   { color: var(--emerald); background: rgba(52, 211, 153, 0.1); }
+.badge.down { color: var(--rose); background: rgba(251, 113, 133, 0.1); }
+.ticker-card:has(.badge.up)::before   { color: var(--emerald); }
+.ticker-card:has(.badge.down)::before { color: var(--rose); }
 
 .ticker-price {
   font-family: var(--font-mono);
   font-size: 1rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
+  margin-bottom: 16px;
 }
 
 .ticker-prob {
-  margin-top: 24px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text-main);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 .prob-bar {
-  height: 6px;
-  background: #333336;
-  border-radius: 999px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
   margin-top: 8px;
   overflow: hidden;
 }
-.prob-bar-fill { 
-  height: 100%; 
-  border-radius: 999px;
-}
-.prob-bar-fill.up { background: var(--up-color); }
-.prob-bar-fill.down { background: var(--down-color); }
+.prob-bar-fill { height: 100%; border-radius: 3px; }
+.prob-bar-fill.up   { background: linear-gradient(90deg, var(--emerald), #6ee7b7); }
+.prob-bar-fill.down { background: linear-gradient(90deg, var(--rose), #fda4af); }
 
 .ticker-asof {
   margin-top: 16px;
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  border-top: 1px solid var(--glass-border);
+  padding-top: 12px;
 }
 
-/* ===================== Cards (general) ===================== */
+/* ===================== General glass cards ===================== */
 .card {
-  background: var(--card-bg);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  margin-bottom: 24px;
-  box-shadow: var(--card-shadow);
-  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  padding: 26px;
+  margin-bottom: 20px;
 }
 .card h3 {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  margin: 0 0 20px;
-  letter-spacing: -0.01em;
+  margin: 0 0 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-primary);
 }
 
 .deepdive-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 24px;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
   align-items: start;
 }
 @media (max-width: 800px) {
@@ -248,74 +313,87 @@ h1 {
 
 /* ===================== Ticker select ===================== */
 #ticker-select {
-  font-family: var(--font-ui);
-  font-size: 1rem;
-  font-weight: 600;
-  background: #2c2c2e;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 10px 16px;
-  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 11px 18px;
+  color: var(--text-primary);
   cursor: pointer;
 }
+#ticker-select option { background: #12172a; color: var(--text-primary); }
 
 /* ===================== Tables ===================== */
 .feature-table, .insider-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
 }
 .feature-table td, .insider-table td, .insider-table th {
-  padding: 12px 8px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--glass-border);
   text-align: left;
 }
-.feature-table td:last-child { text-align: right; font-family: var(--font-mono); font-weight: 500; }
+.feature-table td:first-child { color: var(--text-secondary); }
+.feature-table td:last-child { text-align: right; font-weight: 700; color: var(--text-primary); }
 .insider-table th {
-  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
   font-weight: 600;
-  border-bottom: 2px solid var(--border-color);
 }
-.tag-buy { color: var(--up-color); font-weight: 600; }
-.tag-sell { color: var(--down-color); font-weight: 600; }
+.insider-table { display: block; overflow-x: auto; }
+.tag-buy { color: var(--emerald); font-weight: 700; }
+.tag-sell { color: var(--rose); font-weight: 700; }
 
 /* ===================== Performance metrics ===================== */
 .metrics-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 .metric-box {
-  background: var(--card-bg);
-  border-radius: var(--radius-md);
-  padding: 24px 16px;
+  border-radius: var(--radius);
+  padding: 20px 16px;
   text-align: center;
-  box-shadow: var(--card-shadow);
-  border: 1px solid rgba(255,255,255,0.05);
 }
 .metric-value {
-  font-family: var(--font-display);
-  font-size: 2rem;
+  font-family: var(--font-mono);
+  font-size: 1.7rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  color: var(--gold);
 }
 .metric-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-weight: 500;
-  margin-top: 8px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-top: 6px;
 }
 
-.methodology ul { margin: 0; padding-left: 20px; color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
+.methodology ul { margin: 0; padding-left: 20px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8; }
+.methodology li::marker { color: var(--gold); }
 
 /* ===================== Footer ===================== */
 footer {
   text-align: center;
-  padding: 32px;
-  color: var(--text-muted);
-  font-size: 0.8rem;
+  padding: 28px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+@media (max-width: 640px) {
+  .topbar { flex-direction: column; gap: 14px; align-items: stretch; padding: 16px 20px; }
+  .tabs { justify-content: center; }
+  main { padding: 32px 18px 80px; }
+  h1 { font-size: 1.7rem; }
 }
