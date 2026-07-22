@@ -17,6 +17,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('refresh-btn').addEventListener('click', handleRefresh);
 });
 
+async function loadResults() {
+  const res = await fetch('data/results.json');
+  if (!res.ok) throw new Error(`Failed to load results.json: ${res.status}`);
+  RESULTS = await res.json();
+  selectedTicker = Object.keys(RESULTS.tickers)[0] || null;
+  document.getElementById('footer-generated').textContent = formatDate(RESULTS.generated_at);
+}
+
 // ===================== Tabs =====================
 function setupTabs() {
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -158,12 +166,12 @@ function renderDeepDive(symbol) {
       datasets: [{
         label: symbol,
         data: t.price_history.map(p => p.close),
-        borderColor: '#0071e3', // Apple Blue
-        backgroundColor: 'rgba(0, 113, 227, 0.08)',
+        borderColor: '#e8b94e',
+        backgroundColor: 'rgba(232, 185, 78, 0.10)',
         fill: true,
         pointRadius: 0,
         borderWidth: 2,
-        tension: 0.4, // Smooth Apple-like curves
+        tension: 0.35,
       }],
     },
     options: chartBaseOptions({ showLegend: false }),
@@ -232,7 +240,7 @@ function renderPerformance() {
   ].forEach(([label, val]) => {
     const box = document.createElement('div');
     box.className = 'metric-box';
-    box.innerHTML = `<div class="metric-value">${(val * 100).toFixed(1)}<span style="font-size:1rem; color:#86868b">%</span></div><div class="metric-label">${label}</div>`;
+    box.innerHTML = `<div class="metric-value">${(val * 100).toFixed(1)}<span style="font-size:1rem; color:var(--text-secondary)">%</span></div><div class="metric-label">${label}</div>`;
     metricsRow.appendChild(box);
   });
 
@@ -245,8 +253,8 @@ function renderPerformance() {
     data: {
       labels: bt.dates,
       datasets: [
-        { label: 'Strategy', data: bt.strategy_cum_return.map(v => v * 100), borderColor: '#0071e3', pointRadius: 0, borderWidth: 2, tension: 0.1 },
-        { label: 'Buy & Hold', data: bt.buy_hold_cum_return.map(v => v * 100), borderColor: '#86868b', pointRadius: 0, borderWidth: 2, borderDash: [5, 4], tension: 0.1 },
+        { label: 'Strategy', data: bt.strategy_cum_return.map(v => v * 100), borderColor: '#e8b94e', pointRadius: 0, borderWidth: 2, tension: 0.15 },
+        { label: 'Buy & Hold', data: bt.buy_hold_cum_return.map(v => v * 100), borderColor: '#a3adc2', pointRadius: 0, borderWidth: 2, borderDash: [5, 4], tension: 0.15 },
       ],
     },
     options: chartBaseOptions({ showLegend: true, yLabel: '%' }),
@@ -261,14 +269,14 @@ function renderPerformance() {
     type: 'bar',
     data: {
       labels: sorted.map(([k]) => prettifyFeatureName(k)),
-      datasets: [{ data: sorted.map(([, v]) => v), backgroundColor: '#0071e3', borderRadius: 4 }],
+      datasets: [{ data: sorted.map(([, v]) => v), backgroundColor: '#e8b94e', borderRadius: 4 }],
     },
     options: {
       indexAxis: 'y',
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { color: '#f2f2f7' } },
-        y: { grid: { display: false }, ticks: { font: { family: '-apple-system', size: 12 } } },
+        x: { grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: '#a3adc2' } },
+        y: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 12 }, color: '#f2f4f9' } },
       },
     },
   });
@@ -276,14 +284,15 @@ function renderPerformance() {
 
 function chartBaseOptions({ showLegend, yLabel }) {
   return {
-    plugins: { legend: { display: !!showLegend, labels: { font: { family: '-apple-system', size: 12 }, usePointStyle: true } } },
+    plugins: { legend: { display: !!showLegend, labels: { font: { family: 'Inter', size: 11 }, color: '#a3adc2', usePointStyle: true } } },
     scales: {
-      x: { grid: { display: false }, ticks: { font: { family: 'ui-monospace, monospace', size: 10 }, maxTicksLimit: 6 } },
+      x: { grid: { display: false }, ticks: { font: { family: 'JetBrains Mono', size: 9 }, color: '#6b7690', maxTicksLimit: 6 } },
       y: {
-        grid: { color: '#f2f2f7' },
+        grid: { color: 'rgba(255,255,255,0.08)' },
         border: { display: false },
         ticks: {
-          font: { family: 'ui-monospace, monospace', size: 11 },
+          font: { family: 'JetBrains Mono', size: 10 },
+          color: '#a3adc2',
           callback: v => yLabel ? v + yLabel : v,
         },
       },
